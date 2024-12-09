@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.cdnfonts.com/css/inter" rel="stylesheet">
+    <title>Document</title>
+</head>
+<style>
+    @import url('https://fonts.cdnfonts.com/css/inter');
+
+    :root {
+        --font-size-name-text: 1rem;
+        --font-size-author-text: .75rem;
+        --font-size-small-text: .625rem;
+
+        --black-color: #212936;
+        --light-black-color: #4D5562;
+        --white-custom-color: #E5E7EB;
+        --pink-color: #C93B76;
+
+        --font-weight-bold: bold;
+        --font-weight-semi-bold: 600;
+        --font-weight-regular: 400;
+    }
+
+    * {
+        font-family: 'Inter', sans-serif;
+    }
+
+    body {
+        background-image: url(./assets/images/bg.jpg);
+    }
+
+    .container_bloc_music {
+        position: relative;
+        height: 97vh;
+    }
+
+    .content_bloc_music {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .bloc_music {
+        width: 340px;
+        padding: 0 0 20px;
+        /* height: 500px; */
+        border-radius: 15px;
+        background-color: #1E2037;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .containerSingleCover {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 10px;
+    }
+
+    .singleCover {
+        width: 100%;
+        border-radius: 15px;
+    }
+
+    .containerMusicInfo {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .musicName {
+        font-size: var(--font-size-name-text);
+        color: var(--white-custom-color);
+    }
+
+    .musicAuthor {
+        font-size: var(--font-size-author-text);
+        color: var(--light-black-color);
+    }
+
+    /* Style général de la barre */
+    progress {
+        width: 100%;
+        /* Largeur de la barre */
+        height: 25px;
+        /* Hauteur de la barre */
+        appearance: none;
+        /* Supprime le style par défaut */
+        -webkit-appearance: none;
+        /* Pour les navigateurs Webkit */
+    }
+    .containerController{
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+    }
+    .time-info{
+        color: var(--light-black-color);
+        font-size: var(--font-size-small-text);
+        display: flex;
+        justify-content: space-between;
+        padding: 0 5px;
+    }
+    .controlsBtn {
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+    }
+    .play-pause{
+        width: 32px;
+        height: 25px;
+        fill: var(--white-custom-color);
+    }
+    .progress-container {
+        width: 300px; /* Ajustez la largeur selon votre besoin */
+        height: 5px; /* Hauteur de la barre */
+        background-color: var(--white-custom-color); /* Couleur de fond */
+        border-radius: 5px; /* Coins arrondis */
+        cursor: pointer; /* Changer le curseur lors du clic */
+        position: relative;
+        overflow: hidden; /* Assure que la barre de progression reste dans le conteneur */
+        border: none;
+    }
+
+    .progress-bar {
+        height: 100%; /* La hauteur de la barre correspond à la hauteur du conteneur */
+        background-color: var(--pink-color); /* Couleur de la barre de progression */
+        width: 0%; /* La largeur commence à 0 et augmente avec la progression */
+        border-radius: 5px;
+        transition: width 0.1s linear; /* Animation fluide lors de la mise à jour */
+    }
+    .playBtn{
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background-color: var(--pink-color);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-shadow: 1px 1px 10px #C93B76;
+    }
+</style>
+
+<body>
+    <div id="app">
+        <div class="container_bloc_music">
+            <div class="content_bloc_music">
+                <div class="bloc_music">
+                    <!-- Image de la musique -->
+                    <div class="containerSingleCover">
+                        <img :src="currentMusic.coverUrl" :alt="currentMusic.name" class="singleCover">
+                    </div>
+
+                    <!-- Informations de la musique -->
+                    <div class="containerMusicInfo">
+                        <div class="musicName">{{ currentMusic.name }}</div>
+                        <div class="musicAuthor">{{ currentMusic.author }}</div>
+                    </div>
+
+                    <!-- Barre de progression et contrôles -->
+                    <div class="containerController">
+                        <!-- Temps -->
+                         <div class="containerTimeInfo">
+                            <div class="time-info">
+                                <div>{{ formatTime(currentTime) }}</div> - 
+                                <div>{{ formatTime(duration) }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Barre de progression -->
+                        <div class="progress-container" @click="setProgress">
+                            <div class="progress-bar" :style="{ width: progress + '%' }"></div>
+                        </div>
+
+                        <!-- Contrôles -->
+                        <div class="controls">
+                            <button @click="prevTrack" class="controlsBtn">
+                                <img src="./assets/images/Stop_and_play_fill-1.svg" alt="Previous">
+                            </button>
+                            <button @click="togglePlay" class="controlsBtn playBtn">
+                                <img :src="isPlaying ? './assets/images/Pause_fill.svg' : './assets/images/Play_fill.svg'"
+                                    alt="Play/Pause" class="play-pause">
+                            </button>
+                            <button @click="nextTrack" class="controlsBtn">
+                                <img src="./assets/images/Stop_and_play_fill.svg" alt="Next">
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Audio -->
+                    <audio ref="audio" @timeupdate="updateProgress" @loadedmetadata="loadMetadata" @ended="nextTrack">
+                        <source :src="currentMusic.song" type="audio/mp3">
+                    </audio>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script type="text/javascript">
+        var app = new Vue({
+            el: '#app',
+            data: {
+                isPlaying: false,
+                currentTime: 0,
+                duration: 0,
+                progress: 0,
+                currentIndex: 0, // Index de la musique actuelle
+                musics: [
+                    {
+                        name: "Lost in the City Lights",
+                        author: "Cosmo Sheldrake",
+                        coverUrl: "./assets/images/cover-1.png",
+                        song: "./assets/musics/lost-in-city-lights-145038.mp3",
+                    },
+                    {
+                        name: "Forest Lullaby",
+                        author: "Lesfm",
+                        coverUrl: "./assets/images/cover-2.png",
+                        song: "./assets/musics/forest-lullaby-110624.mp3",
+                    },
+                ],
+            },
+            computed: {
+                currentMusic() {
+                    return this.musics[this.currentIndex];
+                },
+            },
+            methods: {
+                togglePlay() {
+                    const audio = this.$refs.audio;
+                    if (this.isPlaying) {
+                        audio.pause();
+                    } else {
+                        audio.play();
+                    }
+                    this.isPlaying = !this.isPlaying;
+                },
+                updateProgress() {
+                    const audio = this.$refs.audio;
+                    this.currentTime = audio.currentTime;
+                    this.progress = (audio.currentTime / audio.duration) * 100;
+                },
+                setProgress(event) {
+                    const containerWidth = event.target.offsetWidth;
+                    const clickX = event.offsetX;
+                    const audio = this.$refs.audio;
+                    const newTime = (clickX / containerWidth) * audio.duration;
+                    audio.currentTime = newTime;
+                },
+                loadMetadata() {
+                    const audio = this.$refs.audio;
+                    this.duration = audio.duration;
+                },
+                formatTime(time) {
+                    const minutes = Math.floor(time / 60);
+                    const seconds = Math.floor(time % 60);
+                    return `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+                },
+                nextTrack() {
+                    this.currentIndex = (this.currentIndex + 1) % this.musics.length; // Passe à la piste suivante
+                    this.resetAudio(); // Réinitialise et recharge l'audio
+                },
+                prevTrack() {
+                    this.currentIndex = (this.currentIndex - 1 + this.musics.length) % this.musics.length; // Passe à la piste précédente
+                    this.resetAudio(); // Réinitialise et recharge l'audio
+                },
+                resetAudio() {
+                    const audio = this.$refs.audio;
+                    audio.pause(); // Arrête la musique en cours
+                    audio.currentTime = 0; // Réinitialise le temps actuel
+                    this.isPlaying = false; // Réinitialise l'état de lecture
+                    this.duration = 0; // Réinitialise la durée affichée
+                    this.progress = 0; // Réinitialise la progression
+                    audio.load(); // Recharge le fichier audio
+                    if (this.isPlaying) {
+                        audio.play(); // Relance la lecture si la musique était en train de jouer
+                    }
+                },
+            }
+        })
+
+    </script>
+</body>
+
+</html>
