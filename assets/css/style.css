@@ -20,12 +20,12 @@
     }
 
     body {
-        background-image: url(./assets/images/bg.jpg);
+        background-image: url(../images/bg.jpg);
     }
 
     .container_bloc_music {
         position: relative;
-        height: 97vh;
+        height: 90vh;
     }
 
     .content_bloc_music {
